@@ -34,7 +34,7 @@
           - set interfaces wireguard wg0 private-key '{{ branch_private_key }}'
           # Nieuwe syntax: Endpoint gesplitst
           - set interfaces wireguard wg0 peer hq-office allowed-ips '10.100.0.1/32'
-          - set interfaces wireguard wg0 peer hq-office remote-address '{{ hq_wan_ip }}'
+          - set interfaces wireguard wg0 peer hq-office address '{{ hq_wan_ip }}'
           - set interfaces wireguard wg0 peer hq-office port '51820'
           - set interfaces wireguard wg0 peer hq-office public-key '{{ hq_public_key }}'
           - set interfaces wireguard wg0 peer hq-office persistent-keepalive '15'
