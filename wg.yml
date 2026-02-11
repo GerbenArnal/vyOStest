@@ -1,0 +1,52 @@
+- name: Configureer SASE WireGuard Tunnel
+  hosts: all
+  gather_facts: no
+  connection: network_cli
+  vars:
+    # --- CONFIGURATIE VARIABELEN ---
+    # Vul hier de WAN IP's in die je VMware NAT/LAN segmenten hebben (check 'show int' op je router)
+    hq_wan_ip: "10.0.0.1"      # Het WAN IP van HQ
+    branch_wan_ip: "10.0.0.2"  # Het WAN IP van Branch
+
+    # Vul hier de sleutels in die je net hebt gegenereerd
+    hq_private_key: "ePwQd9Fw45z8yIkFAAAtDuhfeBvzy/Ennj9vFdtXMHU="
+    hq_public_key: "ik0dZqlozE2l7uZenGmoKUHkk0kOU8niFX8wJGneoGU="
+    
+    branch_private_key: "ULEH12xf4SE2bxaz+IG+5sC1ScrJnKVFynf5NGhmQkE="
+    branch_public_key: "OCdS9/QtytdYt5u1PDIH9YLj8cDdm0F1ZcwK5wEvJUo="
+
+  tasks:
+    # --- CONFIGURATIE VOOR HQ ROUTER ---
+    - name: Setup WireGuard op HQ
+      vyos.vyos.vyos_config:
+        lines:
+          - set interfaces wireguard wg0 address '10.100.0.1/30'
+          - set interfaces wireguard wg0 port '51820'
+          - set interfaces wireguard wg0 private-key '{{ hq_private_key }}'
+          # Koppel de Branch (Peer) aan HQ
+          - set interfaces wireguard wg0 peer branch-office allowed-ips '10.100.0.2/32'
+          - set interfaces wireguard wg0 peer branch-office public-key '{{ branch_public_key }}'
+      when: inventory_hostname == 'hq-router'
+
+    # --- CONFIGURATIE VOOR BRANCH ROUTER ---
+    - name: Setup WireGuard op Branch
+      vyos.vyos.vyos_config:
+        lines:
+          - set interfaces wireguard wg0 address '10.100.0.2/30'
+          - set interfaces wireguard wg0 private-key '{{ branch_private_key }}'
+          # Koppel HQ (Peer) aan Branch
+          - set interfaces wireguard wg0 peer hq-office allowed-ips '10.100.0.1/32'
+          - set interfaces wireguard wg0 peer hq-office endpoint '{{ hq_wan_ip }}:51820'
+          - set interfaces wireguard wg0 peer hq-office public-key '{{ hq_public_key }}'
+          # Houd de tunnel levend (belangrijk voor NAT!)
+          - set interfaces wireguard wg0 peer hq-office persistent-keepalive '15'
+      when: inventory_hostname == 'branch-router'
+
+    # --- ROUTING (Zodat ze elkaar kunnen pingen door de tunnel) ---
+    - name: Open Firewall voor WireGuard (Simpel)
+      vyos.vyos.vyos_config:
+        lines:
+          - set firewall name WAN-IN rule 10 action 'accept'
+          - set firewall name WAN-IN rule 10 protocol 'udp'
+          - set firewall name WAN-IN rule 10 destination port '51820'
+          # Koppel dit later aan je WAN interface als je firewalling aanzet
