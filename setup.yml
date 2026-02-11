@@ -1,0 +1,17 @@
+- name: SASE Lab Basis Setup
+  hosts: all
+  gather_facts: no
+  tasks:
+    - name: Haal router feiten op
+      vyos.vyos.vyos_facts:
+        gather_subset: min
+
+    - name: Stel DNS in op Google (Test configuratie)
+      vyos.vyos.vyos_system:
+        name_servers:
+          - 8.8.8.8
+          - 1.1.1.1
+
+    - name: Toon succesbericht
+      debug:
+        msg: "Verbonden met {{ ansible_net_hostname }}! Versie: {{ ansible_net_version }}"
