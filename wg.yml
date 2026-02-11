@@ -40,6 +40,24 @@
           - set interfaces wireguard wg0 peer hq-office persistent-keepalive '15'
       when: inventory_hostname == 'branch-router'
 
-    # --- FIREWALL (OPTIONEEL) ---
-    # Ik heb deze even uitgecommentarieerd. Eerst de tunnel werkend krijgen!
-    # Als de tunnel werkt, kun je dit later toevoegen met "set firewall ipv4 name..."
+    # --- FIREWALL OPENZETTEN (VOEG DIT TOE) ---
+    
+    # 1. Maak de firewall regel aan
+    - name: Configureer Firewall Regel voor WireGuard
+      vyos.vyos.vyos_config:
+        lines:
+          - set firewall name WAN-IN default-action 'drop'
+          - set firewall name WAN-IN rule 10 action 'accept'
+          - set firewall name WAN-IN rule 10 protocol 'udp'
+          - set firewall name WAN-IN rule 10 destination port '51820'
+          - set firewall name WAN-IN rule 10 description 'Allow WireGuard'
+          # Sta ook pings toe (handig voor debuggen)
+          - set firewall name WAN-IN rule 20 action 'accept'
+          - set firewall name WAN-IN rule 20 protocol 'icmp'
+
+    # 2. Koppel de firewall aan de WAN interface (eth1)
+    # LET OP: Check of jouw WAN interface eth1 is!
+    - name: Koppel Firewall aan Interface
+      vyos.vyos.vyos_config:
+        lines:
+          - set interfaces ethernet eth1 firewall local name 'WAN-IN'
