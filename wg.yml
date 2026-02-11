@@ -7,11 +7,11 @@
     hq_wan_ip: "10.0.0.1" 
     branch_wan_ip: "10.0.0.2"
 
-    hq_private_key: "JOUW_KEY_HIER"
-    hq_public_key: "JOUW_KEY_HIER"
+    hq_private_key: "ePwQd9Fw45z8yIkFAAAtDuhfeBvzy/Ennj9vFdtXMHU="
+    hq_public_key: "ik0dZqlozE2l7uZenGmoKUHkk0kOU8niFX8wJGneoGU="
     
-    branch_private_key: "JOUW_KEY_HIER"
-    branch_public_key: "JOUW_KEY_HIER"
+    branch_private_key: "ULEH12xf4SE2bxaz+IG+5sC1ScrJnKVFynf5NGhmQkE="
+    branch_public_key: "OCdS9/QtytdYt5u1PDIH9YLj8cDdm0F1ZcwK5wEvJUo="
 
   tasks:
     # --- HQ ROUTER CONFIGURATIE ---
