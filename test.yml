@@ -1,16 +1,22 @@
+# DEEL 1: Installeer de benodigde software op de server zelf (localhost)
+- name: Prepareer de Control Node (Semaphore)
+  hosts: localhost
+  connection: local
+  gather_facts: no
+  tasks:
+    - name: Installeer Paramiko Python Library
+      ansible.builtin.command: pip install paramiko
+      changed_when: false
+
+# DEEL 2: Configureer de Routers
 - name: SASE Lab Basis Setup
   hosts: all
   gather_facts: no
+  connection: network_cli # Dit is belangrijk voor VyOS!
   tasks:
     - name: Haal router feiten op
       vyos.vyos.vyos_facts:
         gather_subset: min
-
-    - name: Stel DNS in op Google (Test configuratie)
-      vyos.vyos.vyos_system:
-        name_servers:
-          - 8.8.8.8
-          - 1.1.1.1
 
     - name: Toon succesbericht
       debug:
